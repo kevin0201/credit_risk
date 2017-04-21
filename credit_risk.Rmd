@@ -20,19 +20,26 @@ on construit un vecteur de lamda systématiques qui représenteront l'entensité
 # Librairie poisson permet la simulation et la visualisation de processus de poisson
 library(poisson)
 library(ggplot2)
-
+library(reshape2)
 # En supposant que la différence de sensibilité suit une loi normale... mais ceci dépend de la loi des lamada...
-lamda_sys = sort(abs(rnorm(20, mean = 0.09, sd = 0.001)), decreasing = TRUE)
+lamda = sort(abs(rnorm(20, mean = 0.2, sd = 0.001)), decreasing = TRUE)
 
 #names(lamda_sys) = strsplit(toString(seq(1,20)), split = ", ")
 
-plot( lamda_sys)
+names_ob = c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20")
 
+names(lamda) = names_ob
+
+# l'intensité systématique pour chaque emmetteur
+
+lamda_sys = cumsum(sort(lamda))
+
+plot( lamda_sys)
 ```
 
 
 ```{r}
-hpp_sys = matrix(0, nrow = 21, ncol = length(lamda_sys))
+hpp_sys = as.data.frame( matrix(0, nrow = 21, ncol = length(lamda_sys)))
 
 for (i in 1:length(lamda_sys)){
   
@@ -40,14 +47,22 @@ for (i in 1:length(lamda_sys)){
   
 }
 
-plot(hpp_sys)
+hpp_sys["Events"] = seq(0,20)
+
+
+
+ggplot(melt(hpp_sys,id.vars = "Events"),aes(x=value,y=Events, group=variable, color=variable))+geom_line()
 
 ```
+
+
 
 ```{r}
 # On considere que le facteur idio est plus rare alors pour chaque débiteur, l'intensité sera moins grande 
 
 lamda_idio = sort(abs(rnorm(20, mean = 0.06, sd = 0.001)), decreasing = TRUE)
+
+names(lamda_idio) = names_ob
 
 plot(lamda_idio)
 
@@ -56,7 +71,9 @@ plot(lamda_idio)
 ```{r}
 # Construction des toi de chaque débiteur...
 
-toi = cumsum(lamda_sys)+lamda_idio
+toi = cumsum(sort(lamda_sys, decreasing = FALSE))+sort(lamda_idio, decreasing = FALSE)
+
+toi
 
 plot(toi)
 
@@ -65,8 +82,22 @@ plot(toi)
 ```{r}
 # Probat de survie sur T = 
 
-T = seq(1,30)
+T = seq(1,5)
 
-survie = exp(-toi*20)
+survie = exp(-toi*2)
+
+surviemat = as.data.frame(matrix(0,nrow = length(T),ncol = length(toi)))
+
+for (i in 1:length(toi)){
+  
+  surviemat[,i] = exp(-toi[i]*T)
+  
+}
+
+surviemat["Maturite"] = T
+
+ggplot(melt(surviemat,id.vars = "Maturite"),aes(x=Maturite,y=value, group=variable, color=variable))+geom_line()
+
+1-survie
 ```
 
