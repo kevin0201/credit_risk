@@ -1,0 +1,72 @@
+---
+title: "credit_risk"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+# Hypothèse
+On suppose un portefeuille de 20 obligataires : 1...20
+Ces débiteurs sont classés par ordre croissants de sensibilité. 1:est le plus sensible et d:est le moins sensible.
+
+
+# Construction des lamda systématiques
+
+on construit un vecteur de lamda systématiques qui représenteront l'entensité du processus de poisson de chaque débiteur. Plus l'intensité est grande, plus le débiteur est sensible. On construit donc un vecteur d'intensité, décroissant. En effet plus un débiteur est insensible au risque de défaut systématique plus son évènement de défaut est rare.
+
+```{r}
+
+# Librairie poisson permet la simulation et la visualisation de processus de poisson
+library(poisson)
+library(ggplot2)
+
+# En supposant que la différence de sensibilité suit une loi normale... mais ceci dépend de la loi des lamada...
+lamda_sys = sort(abs(rnorm(20, mean = 0.09, sd = 0.001)), decreasing = TRUE)
+
+#names(lamda_sys) = strsplit(toString(seq(1,20)), split = ", ")
+
+plot( lamda_sys)
+
+```
+
+
+```{r}
+hpp_sys = matrix(0, nrow = 21, ncol = length(lamda_sys))
+
+for (i in 1:length(lamda_sys)){
+  
+  hpp_sys[,i] = hpp.sim(lamda_sys[i], num.events = 20)
+  
+}
+
+plot(hpp_sys)
+
+```
+
+```{r}
+# On considere que le facteur idio est plus rare alors pour chaque débiteur, l'intensité sera moins grande 
+
+lamda_idio = sort(abs(rnorm(20, mean = 0.06, sd = 0.001)), decreasing = TRUE)
+
+plot(lamda_idio)
+
+```
+
+```{r}
+# Construction des toi de chaque débiteur...
+
+toi = cumsum(lamda_sys)+lamda_idio
+
+plot(toi)
+
+```
+
+```{r}
+# Probat de survie sur T = 
+
+T = seq(1,30)
+
+survie = exp(-toi*20)
+```
+
