@@ -1,0 +1,61 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{mathrsfs}
+\usepackage{dsfont}
+\author{moi}
+\title{resume}
+\begin{document}
+	
+	Cette section présente le modèle pour les défauts dépendants ou correlés. Ce modèle propose une alternative sérieuse afin de parer aux limites du modèle de copule présenté dans la section précédente.
+	
+	Considérons $d$  émétteurs d'obligations avec les temps de défaut $ \tau_1 \ldots \tau_d $ et des probabilités de défaut conditionnelle $ \lambda_1 \ldots \lambda_d $. la correlation des temps de défault  entre les émétteurs peut être la conséquence de deux facteurs , systématique (hypothèse de dépendance de temps de défaut) et spécifique (propre à chaque émétteur). La survenance d'un défaut, indépendamment du facteur, peut être interprété mathématiquement comme le premier saut dans un processus de poisson.
+	
+	Ainsi, pour chaque emétteur $ i $, le temps d'attente de survenance d'un défaut spécifique est modélisé par une variable aléatoire $ Y_i $, de loi exponentielle et de paramètre $ \lambda_i^{idio} $. Contrairement au modèle de copule qui considère une variable systématique unique, le modèle introduit une famille de variables exponentielles croissante $ Z_1 \ldots Z_d $, de paramètres $ \lambda_1^{syst} \ldots \lambda_d^{syst} $. Le temps de défaut individuel de chaque émetteur est : 
+	$$ \tau_i = min\{ Y_i, Z_i\} $$
+	
+	le temps de défaut suit une loi exponentielle de paramètre $ \lambda_i = \lambda_i^{idio} + \lambda_i^{syst}  $, avec une fonction de survie :
+	$$\mathbb{P}( \tau_i \textgreater T) = \exp(-\lambda_i T) $$
+	
+	Généralisons le modèle pour un grand nombre de variable.
+	
+	Afin de prendre en compte plusierus distributions de facteurs et de probabilité de défaut conditionnelle, supposons que toutes les variables aléatoires sont définies sur un espace probabilisé $ (\Omega,\mathcal{F},\mathbb{P}) $ de filtration   $ (\mathcal{F}_t)_{t\geq0} $ représentant l'information disponible $ \mathbb{P} $ la probabilité risque neutre.
+	
+	Quelques définitions
+	
+	Le temps de défaut $ \tau $ est une variable aléatoire telle que $ \{ \tau \leq t\} \in \mathcal{F}_t)$.
+	Soit $ \lambda(t) $  un processus $ \mathcal{F}_t-mesurable $
+	
+	Définition d'un facteur systématique :
+	
+	Un facteur systématique est le couple $ (\{ Z_i\}_{i=1}^{d}, \varPhi ) $, avec $ \{ Z_i\}_{i=1} $ une famille de variable aléatoire donnée, et $ \varPhi $ une fonction de permutation telle que 
+	$  Z_{\varPhi(i)} \leq Z_{\varPhi(i+1)}, i=1,\ldots,d $.
+	
+	Ainsi chaque facteur systématique correspond à une permutation de la famille des variables aléatoires. Dans un portefeuille de crédit de $ d $ émetteurs différents, il existe $ d! $ possibles permutations donc de facteurs sytématiques, chaque permutation correspondant à un ordre possible de sensibilité croissante des émetteurs. 
+	
+	Le modèle conserve la propriété des temps d'arrêt des évènements de crédit, tout en permettant à chaque emmeteur d'avoir une sensibilité au défaut dynamique par rapport aux autres, donc d'avoir une correlation différente avec le facteur de défaut systématique.
+	
+	La construction de facteur systématique
+	
+	Soit, $ \mathcal{Z}  = \{ \tilde{Z}_i : i = 1,\ldots,d\} $ une famille de $ \mathcal{F}_t-mesurable $ temps d'arrêt, de probabilité de défaut respectifs $ \lambda_i(t) $ telle que :
+	
+	$$ \mathds{1}_{ \{ min_{ \xi \in V } \xi > t \} } + \int_0^{t} \mathds{1}_{ \{ min_{ \xi \in V } \xi > s \} } \sum_{\xi \in V} \lambda_\xi(s) ds $$
+	
+	
+	est une martingale pour tout $ V \subseteq \mathcal{Z} $. Soit $ \varPhi(.) $ une fonction de permutation, $ Z_i = min{\tilde{Z}_j : \varPhi^{-1}(i)\leq l \leq d } $ est un fateur systématique. La suite $  $ est croissante et par hypothèse : 
+	
+	$$ N_i(t) + \int_0^{t} N_i(s)  \sum_{j=\varPhi^{-1}(i)}^d \lambda_j(s)ds $$ 
+	
+	
+	
+	est une martingale et $ \sum_{j = \varPhi^{-1}(i)}^{d} \lambda_j(t) $ la probabilité de défaut conditionnelle de $ Z_i $. 
+	
+	Ce raisonnement mathématique démontre que tout emetteur peut avoir une dépendance différente de l'un des $ d! $ facteurs systématiques, ce qui engendre une structure de correlation diversifiée. 
+	
+	
+	
+\end{document}
