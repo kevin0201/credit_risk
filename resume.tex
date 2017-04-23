@@ -77,4 +77,34 @@
 	$$ \mathbb{P}(\tau_i>T \mid \mathcal{F}_t)  = \mathbb{E} \left\{ exp\left(-\int_t^T \sum_{\xi \in U(i)} \lambda_\xi(s)ds\right) \mid \mathcal{F}_t \right\} \mathds{1}_{\tau_i>t} $$
 	
 	
+	\subsubsection{Application du modèle}
+	
+	Dans cette section, se présente une implémentation simplifiée du modèle avec un ensemble de données simulées. 
+	La calibration du modèle consiste à exprimer les probabilités de défaut conditionnelles en fonction des facteurs systématiques et spécifiques.
+	la première étape consiste à construire les facteurs systématiques.
+	Pour se faire, on ordonne les actifs de crédit, ou les émetteurs par ordre decroissant, $ 1,\ldots, d $ de leur sensibilité au facteur systématique. Ceci se matérialise par exemple par la construction d'un processus de poisson d'intensité $ \lambda_i^{sys} $ pour chaque emetteur.
+	
+	\includegraphics[width = \textwidth]{credit_risk_files/figure-latex/unnamed-chunk-1-1.pdf}
+	
+	 Ainsi, l'intensité de défaut systématique, d'un émetteur $ i $ sera $ \sum_{j=i}^d  \lambda_j^{sys} $. Le graphique ci-dessous présente l'évolution de ces intensités. 
+	
+	\includegraphics[width = \textwidth]{credit_risk_files/figure-latex/unnamed-chunk-2-1.pdf}
+	
+	Sachant que chaque émetteur est aussi affecté par un facteur spécifique $ Y_i $, d'intensité $ \lambda_i^{idio} $, les temps de défaut sont de loi exponentielle de paramètre $ \lambda_i = \lambda_i^{idio} + \sum_{j=1}^d \lambda_i^{sys} $. On obtient donc la probabilité de défaut en fonction des $ \lambda_i $ (Maturité T =2)
+	
+	\includegraphics[width = \textwidth]{credit_risk_files/figure-latex/unnamed-chunk-5-1.pdf}
+	
+	Ainsi à partir de ces paramètres on peu construire la distribution des défauts, en fonction du type de facteur. A partir de la formule $ \mathbb{P}(N^{sys}(t)=j) = \exp(-t\lambda_{j+1}^{sys}) - \exp(-t\lambda_{j}^{sys} ) $, on obtient la distribution des défaults de facteur systématique.
+	
+	\includegraphics[width = \textwidth]{credit_risk_files/figure-latex/unnamed-chunk-7-1.pdf}
+	
+	La formule $ \mathbb{P}(N_j(t)=m) = \frac{1}{m!}\left(t \sum_{i=j+1}^d \lambda_i^{idio}\right)^m \left(-t \sum_{i=j+1}^d \lambda_i^{idio}\right)  $, permet de déterminer la distribution des défauts de facteur spécifique.
+	
+	\includegraphics[width = \textwidth]{credit_risk_files/figure-latex/unnamed-chunk-6-1.pdf}
+	
+	En superposant ces deux graphiques on obtient.
+	
+	\includegraphics[width = \textwidth]{credit_risk_files/figure-latex/unnamed-chunk-8-1.pdf}
+	
+	
 \end{document}
