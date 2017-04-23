@@ -13,7 +13,7 @@ Ces débiteurs sont classés par ordre croissants de sensibilité. 1:est le plus
 
 # Construction des lamda systématiques
 
-on construit un vecteur de lamda systématiques qui représenteront l'entensité du processus de poisson de chaque débiteur. Plus l'intensité est grande, plus le débiteur est sensible. On construit donc un vecteur d'intensité, décroissant. En effet plus un débiteur est insensible au risque de défaut systématique plus son évènement de défaut est rare.
+on construit un vecteur de lamda systématiques qui représenteront l'entensité du processus de poisson de chaque émetteur Plus l'intensité est grande, plus le débiteur est sensible. On construit donc un vecteur d'intensité, décroissant. En effet plus un débiteur est insensible au risque de défaut systématique plus son évènement de défaut est rare.
 
 ```{r}
 
@@ -76,53 +76,52 @@ plot(lamda_idio)
 toi = lamda_sys+lamda_idio
 
 toi = sort(toi, decreasing = TRUE)
-
-plot(toi)
-
 ```
 
 ```{r}
-# Probat de survie sur T = 
-
-T = seq(1,5)
-
+# Probat de survie sur T = 2
 survie = exp(-toi*2)
 
-plot(toi,1-survie)
+plot(toi,1-survie,xlab = "Intensité de défaut",ylab = "Probabilité de défaut", main = "Probabilité de défaut", type = "l")
 
-# surviemat = as.data.frame(matrix(0,nrow = length(T),ncol = length(toi)))
-# 
-# for (i in 1:length(toi)){
-#   
-#   surviemat[,i] = exp(-toi[i]*T)
-#   
-# }
-
-surviemat["Maturite"] = T
-
-ggplot(melt(surviemat,id.vars = "Maturite"),aes(x=Maturite,y=value, group=variable, color=variable))+geom_line()
-
-1-survie
 ```
 
 
 ```{r}
-# system
+# Maturite de 10 ans
  T =10
 probasys = c()
 
 lamda_sys = sort(lamda_sys, decreasing = TRUE)
+
+# Probat de défaut systematique
+
 for (i in 1:19){
 probasys[i] = exp(-T*lamda_sys[i+1])-exp(-T*lamda_sys[i])
 }
 
-m=0:100
+# Nombre de défaut
+
+m=0:18
+
+# Probat de défaut specifique
 
 probaidio = (1/factorial(m))*((T*sum(lamda_idio[2:d]))^m)*exp(-T*sum(lamda_idio[2:d]))
 
-plot(probaidio)
+plot(probaidio, xlab = "Nombre de défaut",ylab = "Probabilité de défaut", main = "Distribution des défauts spécifiques", type = "l")
 
-plot(sort(probasys,decreasing = TRUE))
+
+plot(sort(probasys,decreasing = TRUE),xlab = "Nombre de défaut",ylab = "Probabilité de défaut", main = "Distribution des défauts systématiques", type = "l")
+
+# creation detaframe pour l'user dans ggplot2
+
+distrib = data.frame(specifique=probaidio,systematique=sort(probasys, decreasing = TRUE),nb=m)
+  
+#plot sismultané des distributions systématiques et idios...
+
+p = ggplot(melt(distrib,id.vars = "nb"),aes(x=nb,y=value, group=variable, color=variable))+geom_line()
+p + ggtitle("Distribution des fateurs de défauts pour 19 émetteurs")
+p + ylab("Probabilité de défaut") + xlab("Nombre de défaut")
 
 
 ```
