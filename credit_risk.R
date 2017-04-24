@@ -1,30 +1,94 @@
 
+# Librairie poisson permet la simulation et la visualisation de processus de poisson
 library(poisson)
+library(ggplot2)
+library(reshape2)
 
-# lamda représente l'intensité du processus c'est à dire la quantité moyenne de survenance des évènements...
-# puisque nous somme dans un contexte de défaut nous prenons un lamda petit qui matérialise la rareté des évèneents...
+d = 20
 
-# On simule 20 loi de poisson et on le plot
-# Les évènement vont des plus sensible au moins sensible...
-# une loi de poisson représente 
-# On a un portefeuille de 20 crédits, donc 20 débiteurs différents num.events = 20
-# pour chaque ddébiteurs on simule un procéssus de poisson...
+# En supposant que la différence de sensibilité suit une loi normale... mais ceci dépend de la loi des lamada...
+lamda = sort(runif(d,min = 0.06, max = 0.1), decreasing = TRUE)
 
-pois_proc_sys = hpp.plot(rate=3, num.events=20, num.sims = 20)
+#names(lamda_sys) = strsplit(toString(seq(1,20)), split = ", ")
 
-Zi = c()
+names_ob = c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20")
 
-j = 2
-     
-for (i in 1:20){
+names(lamda) = names_ob
+
+# l'intensité systématique pour chaque emmetteur
+
+lamda_sys = cumsum(sort(lamda, decreasing = FALSE))
+
+plot( sort(lamda_sys,decreasing = TRUE     ))
+
+hpp_sys = as.data.frame( matrix(0, nrow = d+1, ncol = length(lamda_sys)))
+
+for (i in 1:length(lamda_sys)){
   
-      Zi[i] = pois_proc_sys$x[j,i]
-      j=j+1
+  hpp_sys[,i] = hpp.sim(lamda_sys[i], num.events = d)
+  
 }
 
-# On ordonne 
+hpp_sys["Events"] = seq(0,d)
 
-Zi = sort(Zi)
-   
-# Factor idiosyncratic
 
+
+ggplot(melt(hpp_sys,id.vars = "Events"),aes(x=value,y=Events, group=variable, color=variable))+geom_line() + ggtitle("Processus de poisson")
+
+
+# On considere que le facteur idio est plus courant alors pour chaque débiteur selon la remarque, l'intensité sera moins grande 
+
+lamda_idio = runif(d,min = 0.06, max = 0.1)
+
+plot(lamda_idio)
+
+# Construction des toi de chaque débiteur...
+
+toi = lamda_sys+lamda_idio
+
+toi = sort(toi, decreasing = TRUE)
+
+# Probat de survie sur T = 2
+survie = exp(-toi*2)
+
+plot(toi,1-survie,xlab = "Intensité de défaut",ylab = "Probabilité de défaut", main = "Probabilité de défaut", type = "l")
+
+# Maturite de 10 ans
+ T =10
+probasys = c()
+
+lamda_sys = sort(lamda_sys, decreasing = TRUE)
+
+# Probat de défaut systematique
+
+for (i in 1:19){
+probasys[i] = exp(-T*lamda_sys[i+1])-exp(-T*lamda_sys[i])
+}
+
+# Nombre de défaut
+
+m=0:18
+
+# Probat de défaut specifique
+
+probaidio = (1/factorial(m))*((T*sum(lamda_idio[2:d]))^m)*exp(-T*sum(lamda_idio[2:d]))
+
+plot(probaidio, xlab = "Nombre de défaut",ylab = "Probabilité de défaut", main = "Distribution des défauts spécifiques", type = "l")
+
+plot(sort(probasys,decreasing = TRUE),xlab = "Nombre de défaut",ylab = "Probabilité de défaut", main = "Distribution des défauts systématiques", type = "l")
+
+# creation detaframe pour l'user dans ggplot2
+
+distrib = data.frame(specifique=probaidio,systematique=sort(probasys, decreasing = TRUE),nb=m)
+  
+#plot sismultané des distributions systématiques et idios...
+
+#########
+######### La seconde partie de la calibration consites à attribuer les facteurs systématiques et spécifiques 
+######### A la probabilité de défaut obtenue de chaque émetteur obtenue à partir des agences de notations, 
+######### des CDS, ou de modèles internes.
+#########
+
+
+p = ggplot(melt(distrib,id.vars = "nb"),aes(x=nb,y=value, group=variable, color=variable))+geom_line()
+p + ggtitle("Distribution des fateurs de défauts pour 19 émetteurs") + ylab("Probabilité de défaut") + xlab("Nombre de défaut")
