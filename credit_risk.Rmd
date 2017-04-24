@@ -1,8 +1,9 @@
 ---
 title: "credit_risk"
 output:
+  pdf_document:
+    keep_tex: yes
   html_document: default
-  pdf_document: default
   word_document: default
 ---
 
@@ -15,7 +16,7 @@ Ces débiteurs sont classés par ordre croissants de sensibilité. 1:est le plus
 
 on construit un vecteur de lamda systématiques qui représenteront l'entensité du processus de poisson de chaque émetteur Plus l'intensité est grande, plus le débiteur est sensible. On construit donc un vecteur d'intensité, décroissant. En effet plus un débiteur est insensible au risque de défaut systématique plus son évènement de défaut est rare.
 
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 # Librairie poisson permet la simulation et la visualisation de processus de poisson
 library(poisson)
@@ -42,7 +43,7 @@ plot( sort(lamda_sys,decreasing = TRUE     ))
 ```
 
 
-```{r}
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
 hpp_sys = as.data.frame( matrix(0, nrow = d+1, ncol = length(lamda_sys)))
 
 for (i in 1:length(lamda_sys)){
@@ -55,13 +56,13 @@ hpp_sys["Events"] = seq(0,d)
 
 
 
-ggplot(melt(hpp_sys,id.vars = "Events"),aes(x=value,y=Events, group=variable, color=variable))+geom_line()
+ggplot(melt(hpp_sys,id.vars = "Events"),aes(x=value,y=Events, group=variable, color=variable))+geom_line() + ggtitle("Processus de poisson")
 
 ```
 
 
 
-```{r}
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
 # On considere que le facteur idio est plus courant alors pour chaque débiteur selon la remarque, l'intensité sera moins grande 
 
 lamda_idio = runif(d,min = 0.06, max = 0.1)
@@ -70,7 +71,7 @@ plot(lamda_idio)
 
 ```
 
-```{r}
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
 # Construction des toi de chaque débiteur...
 
 toi = lamda_sys+lamda_idio
@@ -78,7 +79,7 @@ toi = lamda_sys+lamda_idio
 toi = sort(toi, decreasing = TRUE)
 ```
 
-```{r}
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
 # Probat de survie sur T = 2
 survie = exp(-toi*2)
 
@@ -87,7 +88,7 @@ plot(toi,1-survie,xlab = "Intensité de défaut",ylab = "Probabilité de défaut
 ```
 
 
-```{r}
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
 # Maturite de 10 ans
  T =10
 probasys = c()
@@ -111,8 +112,17 @@ probaidio = (1/factorial(m))*((T*sum(lamda_idio[2:d]))^m)*exp(-T*sum(lamda_idio[
 plot(probaidio, xlab = "Nombre de défaut",ylab = "Probabilité de défaut", main = "Distribution des défauts spécifiques", type = "l")
 
 
+
+
+```
+
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
 plot(sort(probasys,decreasing = TRUE),xlab = "Nombre de défaut",ylab = "Probabilité de défaut", main = "Distribution des défauts systématiques", type = "l")
 
+
+```
+
+```{r,  echo=FALSE, message=FALSE, warning=FALSE}
 # creation detaframe pour l'user dans ggplot2
 
 distrib = data.frame(specifique=probaidio,systematique=sort(probasys, decreasing = TRUE),nb=m)
@@ -120,8 +130,7 @@ distrib = data.frame(specifique=probaidio,systematique=sort(probasys, decreasing
 #plot sismultané des distributions systématiques et idios...
 
 p = ggplot(melt(distrib,id.vars = "nb"),aes(x=nb,y=value, group=variable, color=variable))+geom_line()
-p + ggtitle("Distribution des fateurs de défauts pour 19 émetteurs")
-p + ylab("Probabilité de défaut") + xlab("Nombre de défaut")
+p + ggtitle("Distribution des fateurs de défauts pour 19 émetteurs") + ylab("Probabilité de défaut") + xlab("Nombre de défaut")
 
 
 ```
